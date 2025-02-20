@@ -33,7 +33,7 @@ export class GoogleDrive {
             JSON.stringify({
                 name: file.name,
                 mimeType: file.type,
-                parents: this.parentFolder
+                parents: [ this.parentFolder ]
             })
         ], { type: "application/json" } ));
         body.append( "file", file );
