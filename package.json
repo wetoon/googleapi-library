@@ -1,18 +1,9 @@
 {
     "name": "googleapi-library",
-    "version": "1.0.3",
+    "version": "1.0.4",
     "description": "Google APIs project for Realtime Database and Drive v3 using fetch",
-    "main": "dist/index.js",
-    "types": "dist/index.d.ts",
     "files": [
-        "dist/database.js",
-        "dist/drive.js",
-        "dist/index.js",
-        "dist/utils.js",
-        "dist/database.d.ts",
-        "dist/drive.d.ts",
-        "dist/index.d.ts",
-        "dist/utils.d.ts"
+        "dist"
     ],
     "repository": {
         "type": "git",
@@ -25,16 +16,23 @@
         "fetch"
     ],
     "exports": {
-        "import": "./dist/index.js",
-        "types": "./dist/index.d.ts"
+        "types": "./dist/index.d.ts",
+        "import": "./dist/index.mjs",
+        "require": "./dist/index.cjs"
     },
     "author": "Tiwz <6121280030@mtc.ac.th>",
     "license": "MIT",
     "publishConfig": {
-        "access": "public"
+        "access": "public",
+        "ignore": [
+            "src/",
+            "build.ts"
+        ]
     },
     "devDependencies": {
-        "typescript": "^5.0.0",
-        "@types/node": "^18.0.0"
+        "@types/bun": "^1.2.2",
+        "@types/node": "^18.0.0",
+        "bun-plugin-dts": "^0.3.0",
+        "typescript": "^5.0.0"
     }
 }
