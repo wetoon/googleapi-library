@@ -1,0 +1,40 @@
+{
+    "name": "googleapi-library",
+    "version": "1.0.3",
+    "description": "Google APIs project for Realtime Database and Drive v3 using fetch",
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
+    "files": [
+        "dist/database.js",
+        "dist/drive.js",
+        "dist/index.js",
+        "dist/utils.js",
+        "dist/database.d.ts",
+        "dist/drive.d.ts",
+        "dist/index.d.ts",
+        "dist/utils.d.ts"
+    ],
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/wetoon/googleapi-library.git"
+    },
+    "keywords": [
+        "googleapis",
+        "realtime-database",
+        "drive-v3",
+        "fetch"
+    ],
+    "exports": {
+        "import": "./dist/index.js",
+        "types": "./dist/index.d.ts"
+    },
+    "author": "Tiwz <6121280030@mtc.ac.th>",
+    "license": "MIT",
+    "publishConfig": {
+        "access": "public"
+    },
+    "devDependencies": {
+        "typescript": "^5.0.0",
+        "@types/node": "^18.0.0"
+    }
+}
