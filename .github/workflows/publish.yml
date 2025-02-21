@@ -1,0 +1,39 @@
+name: Publish GoogleAPI Library
+
+on:
+  push:
+    branches:
+      - main
+
+defaults:
+  run:
+    shell: bash
+
+permissions:
+  id-token: write
+
+env:
+  ACTIONS_RUNNER_DEBUG: true
+
+jobs:
+  publish:
+    name: 'Publish: npm Registry'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+          registry-url: "https://registry.npmjs.org"
+      - name: Install dependencies
+        run: bun add -D @types/bun bun-plugin-dts
+      - name: Build the project
+        run: bun build.ts
+      - name: Publish to NpmJS
+        run: |
+          echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > .npmrc
+          bun publish
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
