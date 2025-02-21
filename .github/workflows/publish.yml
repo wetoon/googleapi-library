@@ -4,8 +4,6 @@ name: Publish GoogleAPI Library
 on:
   release:
     types: [published]
-    branches:
-      - main
 
 defaults:
   run:
