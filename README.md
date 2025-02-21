@@ -2,7 +2,8 @@
 
 This project provides a simple interface for interacting with Google Drive and Firebase Realtime Database using only `fetch` requests, without setting up an HTTP server.
 
-## Cloudflare Workers Support
+### NodeJS version >= 18
+### Cloudflare Workers Support
 
 ## Installation
 
