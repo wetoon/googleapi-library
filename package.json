@@ -4,7 +4,7 @@
     "author": "Tiwz <6121280030@mtc.ac.th>",
     "repository": {
         "type": "git",
-        "url": "https://github.com/wetoon/googleapi-library.git"
+        "url": "git+https://github.com/wetoon/googleapi-library.git"
     },
     "exports": {
         "types": "./dist/index.d.ts",

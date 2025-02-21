@@ -42,6 +42,9 @@ jobs:
       - name: Build the project
         run: bun build.ts
 
+      - name: Fix package.json
+        run: npm pkg fix
+
       - name: Publish to NpmJS
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
