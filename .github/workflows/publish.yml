@@ -1,7 +1,9 @@
+
 name: Publish GoogleAPI Library
 
 on:
-  push:
+  release:
+    types: [published]
     branches:
       - main
 
