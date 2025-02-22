@@ -36,11 +36,14 @@ jobs:
           node-version: '22.x'
           registry-url: 'https://registry.npmjs.org'
 
-      - name: Install dependencies
+      - name: Install Build tool Dependencies
         run: bun add -D @types/bun bun-plugin-dts
 
       - name: Build the project
         run: bun build.ts
+
+      - name: Remove Build tool Dependencies
+        run: bun remove @types/bun bun-plugin-dts
 
       - name: Fix package.json
         run: npm pkg fix
