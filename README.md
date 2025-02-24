@@ -1,87 +1,133 @@
 # GoogleAPI Library
 
-This project provides a simple interface for interacting with Google Drive and Firebase Realtime Database using only `fetch` requests, without setting up an HTTP server.
+&#x20;
 
-## Engines
-- [NodeJS](https://nodejs.org/en) version >= 18
+Google APIs project for Realtime Database and Drive v3 using `fetch`.
+
+## Features
+
+- Google Drive API v3 support
+- Google Realtime Database support
+- Uses `fetch` for HTTP requests
+- Supports Cloudflare Workers KV for caching access tokens
 
 ## Installation
+
+Install via npm:
 
 ```sh
 npm install googleapi-library
 ```
 
+or using Bun:
+
+```sh
+bun add googleapi-library
+```
+
 ## Usage
 
-### Authentication
+### Import the Library
 
-To use this library, you need to provide Google service account credentials.
-
-```typescript
+```ts
 import { GoogleAuth } from "googleapi-library";
-
-const credentials = {
-  client_email: "your-service-account@your-project.iam.gserviceaccount.com",
-  private_key: "your-private-key"
-};
-
-const googleAuth = new GoogleAuth(credentials);
 ```
 
-### Google Drive
+or with CommonJS:
 
-#### Initialize Google Drive
-```typescript
-const drive = googleAuth.drive("your-folder-id");
+```js
+const { GoogleAuth } = require("googleapi-library");
 ```
 
-#### Upload a File
-```typescript
-const fileId = await drive.create(myFile);
-console.log("Uploaded file ID:", fileId);
+### Initialize API
+
+```ts
+const auth = new GoogleAuth({
+  credential: {
+    client_email: "YOUR_CLIENT_EMAIL",
+    private_key: "YOUR_PRIVATE_KEY",
+  },
+  storage: new Map(), // or use KVNamespace in Cloudflare Workers
+});
 ```
 
-#### Delete a File
-```typescript
-const success = await drive.remove("file-id");
-console.log("File deleted:", success);
+## Google Drive API
+
+### Create a File
+
+```ts
+const drive = auth.drive();
+const file = new File(["Hello World"], "hello.txt", { type: "text/plain" });
+const response = await drive.create(file);
+console.log(response);
 ```
 
-#### List Files
-```typescript
-const files = await drive.filter();
-console.log("Files:", files);
+### Remove a File
+
+```ts
+await drive.remove("FILE_ID");
+console.log("File removed successfully");
 ```
 
-### Firebase Realtime Database
+### Find All Files
 
-#### Initialize Database
-```typescript
-const database = googleAuth.database("https://your-database.firebaseio.com");
+```ts
+const files = await drive.findAll();
+console.log(files);
 ```
 
-#### Retrieve Data
-```typescript
-const data = await database.findAll("/path");
-console.log("Data:", data);
+## Google Realtime Database API
+
+### Create Data
+
+```ts
+const database = auth.database();
+await database.create("path/to/data", { key: "value" });
+console.log("Data created successfully");
 ```
 
-#### Insert or Update Data
-```typescript
-await database.create("/path", { key: "value" });
+### Remove Data
+
+```ts
+await database.remove("path/to/data");
+console.log("Data removed successfully");
 ```
 
-#### Delete Data
-```typescript
-await database.remove("/path");
+### Find All Data
+
+```ts
+const allData = await database.findAll("path/to/data");
+console.log(allData);
 ```
 
-#### Query Data
-```typescript
-const result = await database.query("/users", { orderBy: "name", equalTo: "John" });
-console.log("Query Result:", result);
+### Query Data
+
+```ts
+const queryResult = await database.query("path/to/data", { orderBy: "key", equalTo: "value" });
+console.log(queryResult);
 ```
+
+### Transaction
+
+```ts
+await database.transaction("path/to/data", (currentData) => {
+  return { ...currentData, updatedKey: "newValue" };
+});
+console.log("Transaction completed successfully");
+```
+
+## Configuration
+
+| Option       | Type                   | Description                    |                      |
+| ------------ | ---------------------- | ------------------------------ | -------------------- |
+| `credential` | `GoogleAuthCredential` | Google service account details |                      |
+| `storage`    | \`Map\<any, any>       | KVNamespace\`                  | Token storage option |
+
+## Repository
+
+[GitHub Repository](https://github.com/wetoon/googleapi-library)
 
 ## License
 
-This project is licensed under the MIT License.
+This project is licensed under the [MIT License](LICENSE).
+

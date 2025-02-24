@@ -1,50 +1,35 @@
 
-import { type GoogleAuthCredential } from ".";
-import { getAccessToken } from "./utils";
+import { type GoogleAuth } from ".";
 
-export class GoogleDrive {
+export function GoogleDrive( this: GoogleAuth, parents: string[] ) {
 
-    private parentFolder: string;
-    private credential: GoogleAuthCredential;
-    private storage: { expireAt?: number, token?: string } = {};
-
-    constructor( credential: GoogleAuthCredential, parent: string ) {
-        this.credential = credential;
-        this.parentFolder = parent;
-    }
-
-    private async getToken(): Promise<string> {
-        const currentTime = Date.now();
-        if ( this.storage.token && currentTime < ( this.storage.expireAt as number ) ) {
-            return this.storage.token;
-        }
-        this.storage.token = await getAccessToken( this.credential );
-        this.storage.expireAt = currentTime + 36e5; // Token valid for 1 hour
-        return this.storage.token as string;
-    }
-
-    async create( file: File ) {
+    /**
+     * GoogleDrive create file
+     * @return `string` File id 
+     */
+    const create = async ( file: File ): Promise<string> => {
         const body = new FormData();
         body.append( "metadata", new Blob([
             JSON.stringify({
-                name: file.name,
-                mimeType: file.type,
-                parents: [ this.parentFolder ]
+                parents, name: file.name, mimeType: file.type
             })
         ], { type: "application/json" } ));
         body.append( "file", file );
-        const token = await this.getToken()
+        const token = await this.findAccessToken();
         const response = await fetch("https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart", {
-            body,
-            method: "POST",
-            headers: { "Authorization": `Bearer ${ token }` }
+            body, method: "POST", headers: { "Authorization": `Bearer ${ token }` }
         });
         const { id } = await response.json() as { id: string };
         return id;
     }
 
-    async remove( fileId: string ) {
-        const token = await this.getToken()
+    /**
+     * GoogleDrive remove file by `id`
+     * @return `true` File deleted
+     * @return `false` File not found
+     */
+    const remove = async ( fileId: string ): Promise< true | false > => {
+        const token = await this.findAccessToken();
         try {
             await fetch( `https://www.googleapis.com/drive/v3/files/${ fileId }`, {
                 method: "DELETE", headers: { "Authorization": `Bearer ${ token }` }
@@ -55,20 +40,23 @@ export class GoogleDrive {
         }
     }
 
-    async filter() {
-        const token = await this.getToken()
+    /**
+     * GoogleDrive list all files
+     * @return `{ id: string, name: string }[]`
+     */
+    const findAll = async () => {
+        const token = await this.findAccessToken();
         try {
             const response = await fetch( `https://www.googleapis.com/drive/v3/files?q='me' in owners&fields=files(id, name)`, {
                 method: "GET", headers: { "Authorization": `Bearer ${ token }` }
             });
             const data = await response.json();
-            if ( data && Array.isArray( data.files ) ) {
-                return data.files as { id: string, name: string }[]
-            }
-            return undefined
+            return data.files as { id: string, name: string }[]
         } catch {
-            return undefined
+            return []
         }
     }
+
+    return { create, remove, findAll }
 
 }

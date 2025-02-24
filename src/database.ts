@@ -1,43 +1,27 @@
-import { type GoogleAuthCredential } from "./index"; // service account object
-import { getAccessToken } from "./utils"; // function to get Google API token
 
-export class GoogleDatabase {
-    
-    private databaseURL: string;
-    private credential: GoogleAuthCredential;
-    private accessToken: string | null = null;
-    private tokenExpiry: number = 0; // Expiry timestamp (ms)
+import { type GoogleAuth } from ".";
 
-    constructor(credential: GoogleAuthCredential, databaseURL: string) {
-        this.credential = credential;
-        this.databaseURL = databaseURL;
-    }
+export function GoogleDatabase( this: GoogleAuth, databaseURL: string ) {
 
-    private async getToken(): Promise<string> {
-        const currentTime = Date.now();
-        if (this.accessToken && currentTime < this.tokenExpiry) {
-            return this.accessToken;
-        }
-        this.accessToken = await getAccessToken(
-            this.credential.client_email,
-            this.credential.private_key,
-            "https://www.googleapis.com/auth/firebase.database"
-        ) as string;
-        this.tokenExpiry = currentTime + 3600 * 1000; // Token valid for 1 hour
-        return this.accessToken;
-    }
+    const database = new URL( databaseURL ).origin;
 
-    async findAll<T = any>(path: string): Promise<T | null> {
-        const token = await this.getToken();
-        const response = await fetch(`${this.databaseURL}/${path}.json`, {
+    /**
+     * Google Firebase Realtime Database. Find all data
+     */
+    const findAll = async < T = any >( path: `/${ string }` ): Promise< T | null > => {
+        const token = await this.findAccessToken();
+        const response = await fetch(`${ database }${ path }.json`, {
             headers: { Authorization: `Bearer ${token}` },
         });
         return response.ok ? await response.json() : null;
     }
 
-    async create<T = any>(path: string, data: T): Promise<T | null> {
-        const token = await this.getToken();
-        const response = await fetch(`${this.databaseURL}/${path}.json`, {
+    /**
+     * Google Firebase Realtime Database. Set data
+     */
+    const create = async < T = any >( path: `/${ string }`, data: T ): Promise< T | null > => {
+        const token = await this.findAccessToken();
+        const response = await fetch(`${ database }${ path }.json`, {
             method: "PUT",
             headers: {
                 Authorization: `Bearer ${token}`,
@@ -48,42 +32,47 @@ export class GoogleDatabase {
         return response.ok ? data : null;
     }
 
-    async remove(path: string): Promise<boolean> {
-        const token = await this.getToken();
-        const response = await fetch(`${this.databaseURL}/${path}.json`, {
+    /**
+     * Google Firebase Realtime Database. Remove data
+     */
+    const remove = async ( path: `/${ string }` ): Promise< boolean > => {
+        const token = await this.findAccessToken();
+        const response = await fetch(`${ database }${ path }.json`, {
             method: "DELETE",
             headers: { Authorization: `Bearer ${token}` },
         });
         return response.ok;
     }
 
-    async query<T = any>(path: string, queryParams: Record< "orderBy" | "equalTo", string>): Promise<T | null> {
-        const token = await this.getToken();
-        const queryString = new URLSearchParams(queryParams).toString();
-        const response = await fetch(`${this.databaseURL}/${path}.json?${queryString}`, {
+    /**
+     * Google Firebase Realtime Database. Query data
+     */
+    const query = async < T = any >( path: `/${ string }`, queryParams: Record< "orderBy" | "equalTo", any > ): Promise< T | null > => {
+        const token = await this.findAccessToken();
+        const queryString = new URLSearchParams( queryParams ).toString();
+        const response = await fetch(`${ database }${ path }.json?${ queryString }`, {
             headers: { Authorization: `Bearer ${token}` },
         });
         return response.ok ? await response.json() : null;
     }
 
-    async transaction<T = any>(path: string, updateFn: (currentData: T) => T): Promise<T | null> {
+    /**
+     * Google Firebase Realtime Database. Transaction update data
+     */
+    const transaction = async < T = any >( path: `/${ string }`, updateFn: ( currentData: T ) => T ): Promise< T | null > => {
         try {
-            const token = await this.getToken();
-            const url = `${this.databaseURL}/${path}.json`;
+            const token = await this.findAccessToken();
+            const url = `${ database }${ path }.json`;
             
-            // Get current data
-            const response = await fetch(url, {
-                method: "GET",
-                headers: { Authorization: `Bearer ${token}` },
+            const response = await fetch( url, {
+                method: "GET", headers: { Authorization: `Bearer ${token}` },
             });
-            if (!response.ok) throw new Error(`Error fetching data: ${response.statusText}`);
+            if ( !response.ok ) throw new Error(`Error fetching data: ${ response.statusText }`);
             const currentData = await response.json();
             
-            // Compute new value
-            const newData = updateFn(currentData);
+            const newData = updateFn( currentData );
             
-            // Save updated value
-            const updateResponse = await fetch(url, {
+            const updateResponse = await fetch( url, {
                 method: "PUT",
                 headers: {
                     Authorization: `Bearer ${token}`,
@@ -92,11 +81,14 @@ export class GoogleDatabase {
                 body: JSON.stringify(newData),
             });
             
-            if (!updateResponse.ok) throw new Error(`Error updating data: ${updateResponse.statusText}`);
+            if ( !updateResponse.ok ) throw new Error(`Error updating data: ${ updateResponse.statusText }`);
             return await updateResponse.json();
-        } catch (error) {
+        } catch ( error ) {
             console.error("Transaction failed:", error);
             return null;
         }
     }
+
+    return { findAll, create, remove, query, transaction }
+
 }
