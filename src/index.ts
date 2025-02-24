@@ -19,16 +19,18 @@ export class GoogleAuth {
         
         if ( this.storage instanceof Map ) {
             
-            const token: string | undefined = this.storage.get("token");
             const expireAt: number | undefined = this.storage.get("expire_at");
 
-            if ( expireAt && Date.now() > expireAt ) {
-                this.storage.set()
+            if ( Date.now() > ( expireAt as number || 0 ) ) {
+                this.storage.set("token", await getAccessToken( this.credential ) );
+                this.storage.set("expire_at", Date.now() + 359e4 );
             }
+
+            return this.storage.get("token") as string
 
         }
 
-        return await getAccessToken( this.credential );
+        
         
     }
 
