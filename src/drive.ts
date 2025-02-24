@@ -1,11 +1,11 @@
 
-import { type GoogleAuthCredential } from "./index";
+import { type GoogleAuthCredential } from ".";
 import { getAccessToken } from "./utils";
 
 export class GoogleDrive {
 
-    private parentFolder: string = "";
-    private credential: GoogleAuthCredential = {};
+    private parentFolder: string;
+    private credential: GoogleAuthCredential;
     private storage: { expireAt?: number, token?: string } = {};
 
     constructor( credential: GoogleAuthCredential, parent: string ) {
@@ -18,11 +18,7 @@ export class GoogleDrive {
         if ( this.storage.token && currentTime < ( this.storage.expireAt as number ) ) {
             return this.storage.token;
         }
-        this.storage.token = await getAccessToken(
-            this.credential.client_email,
-            this.credential.private_key,
-            "https://www.googleapis.com/auth/drive"
-        );
+        this.storage.token = await getAccessToken( this.credential );
         this.storage.expireAt = currentTime + 36e5; // Token valid for 1 hour
         return this.storage.token as string;
     }
