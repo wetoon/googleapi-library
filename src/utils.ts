@@ -13,25 +13,18 @@ function ptob( pem: string ): ArrayBuffer {
     return uint8Array.buffer;
 }
 
-async function createWebtoken( client_email: string, private_key: string, scope: string ) {
-
+async function createWebtoken( credential: { client_email: string, private_key: string, scope: string }) {
     const now = Math.floor( Date.now() / 1e3 );
-
-    const payload = btoa( JSON.stringify({
-        iss: client_email,
-        scope: scope,
-        aud: "https://oauth2.googleapis.com/token",
-        exp: now + 3600,
-        iat: now
-    })).replace(/=/g, "").replace(/\+/g, "-").replace(/\//g, "_");
-
-    const encoder = new TextEncoder();
-    const keyBuffer = ptob( private_key );
-    const key = await crypto.subtle.importKey( "pkcs8", keyBuffer, { name: "RSASSA-PKCS1-v1_5", hash: "SHA-256" }, false, ["sign"] );
-    const toSign = `eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.${ base64UrlEncode( payload ) }`;
-    const signature = await crypto.subtle.sign( "RSASSA-PKCS1-v1_5", key, encoder.encode( toSign ) );
+    const header = "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9"; // { alg: "RS256", typ: "JWT" }
+    const payload = btoa( JSON.stringify({ scope, iss: client_email, aud: "https://oauth2.googleapis.com/token", exp: now + 3600, iat: now })).replace(/=/g, "").replace(/\+/g, "-").replace(/\//g, "_");
+    const token = header.concat( ".", payload );
+    const signature = await crypto.subtle.sign(
+        "RSASSA-PKCS1-v1_5",
+        await crypto.subtle.importKey( "pkcs8", ptob( private_key ), { name: "RSASSA-PKCS1-v1_5", hash: "SHA-256" }, false, ["sign"] ),
+        new TextEncoder().encode( token )
+    );
     const signatureBase64 = btoa( String.fromCharCode( ...new Uint8Array( signature ) ) ).replace(/=/g,"").replace(/\+/g,"-").replace(/\//g,"_");
-    return `${ toSign }.${ signatureBase64 }`;
+    return `${ token }.${ signatureBase64 }`;
 }
 
 export async function getAccessToken( client_email: string, private_key: string, scope: string ) {
