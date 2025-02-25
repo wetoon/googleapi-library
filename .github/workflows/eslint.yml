@@ -1,0 +1,29 @@
+name: ESLint Check
+
+on: 
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+          registry-url: "https://registry.npmjs.org"
+
+      - name: Install dependencies using Bun
+        run: bun add eslint -D && bun add @cloudflare/workers-types -D
+
+      - name: Run ESLint on TypeScript files
+        run: bunx eslint "src/**/*.ts"
