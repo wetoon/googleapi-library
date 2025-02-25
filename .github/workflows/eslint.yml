@@ -23,10 +23,10 @@ jobs:
           registry-url: "https://registry.npmjs.org"
       
       - name: Install dependencies using Bun
-        run: bun add -D eslint @cloudflare/workers-types
+        run: bun add -D eslint @cloudflare/workers-types @typescript-eslint/parser @typescript-eslint/eslint-plugin
 
       - name: Run ESLint on TypeScript files
-        run: bunx eslint "src/**/*.ts"
+        run: bunx eslint --no-ignore "src/**/*.ts"
       
       - name: Remove dependencies using Bun
-        run: bun remove eslint @cloudflare/workers-types
+        run: bun remove eslint @cloudflare/workers-types @typescript-eslint/parser @typescript-eslint/eslint-plugin

@@ -1,6 +1,10 @@
 
 export default {
-  extends: ['eslint:recommended'],
+  parser: '@typescript-eslint/parser',
+  extends: [
+    'eslint:recommended',
+    'plugin:@typescript-eslint/recommended',
+  ],
   rules: {
     'indent': ['error', 'tab'],
     'tabWidth': ['error', 4],
