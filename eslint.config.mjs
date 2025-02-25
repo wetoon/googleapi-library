@@ -1,5 +1,6 @@
 
 export default {
+  files: ["src/**/*.ts"],
   parser: '@typescript-eslint/parser',
   extends: [
     'eslint:recommended',
