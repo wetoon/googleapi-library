@@ -1,4 +1,3 @@
-
 name: Publish GoogleAPI Library
 
 on:
@@ -17,7 +16,7 @@ env:
 
 jobs:
   publish:
-    name: 'Publish: npm Registry'
+    name: 'Publish: Bun Registry'
     runs-on: ubuntu-latest
     steps:
 
@@ -30,12 +29,6 @@ jobs:
           bun-version: latest
           registry-url: "https://registry.npmjs.org"
 
-      - name: Set up NodeJS
-        uses: actions/setup-node@v4
-        with:
-          node-version: '22.x'
-          registry-url: 'https://registry.npmjs.org'
-
       - name: Install Build tool Dependencies
         run: bun add -D @types/bun bun-plugin-dts
 
@@ -45,10 +38,7 @@ jobs:
       - name: Remove Build tool Dependencies
         run: bun remove @types/bun bun-plugin-dts
 
-      - name: Fix package.json
-        run: npm pkg fix
-
-      - name: Publish to NpmJS
+      - name: Publish to NpmJS using Bun
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: npm publish --provenance --access=public
+        run: bun publish --provenance --access=public
