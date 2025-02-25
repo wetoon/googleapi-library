@@ -22,8 +22,14 @@ jobs:
           bun-version: latest
           registry-url: "https://registry.npmjs.org"
 
+      - name: Migrate eslint config
+        run: bun add @eslint/migrate-config -D && bunx @eslint/migrate-config .eslintrc.json
+
       - name: Install dependencies using Bun
         run: bun add eslint -D && bun add @cloudflare/workers-types -D
 
       - name: Run ESLint on TypeScript files
         run: bunx eslint "src/**/*.ts"
+      
+      - name: Remove dependencies using Bun
+        run: bun remove @eslint/migrate-config eslint @cloudflare/workers-types
