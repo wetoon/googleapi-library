@@ -9,7 +9,8 @@ await build({
     target: "node",
     outdir: "dist",
     plugins: [ dts() ],
-    naming: "index.mjs"
+    naming: "index.mjs",
+    external: ["@cloudflare/workers-types"]
 })
 
 await build({
@@ -18,5 +19,6 @@ await build({
     format: "cjs",
     target: "node",
     outdir: "dist",
-    naming: "index.cjs"
+    naming: "index.cjs",
+    external: ["@cloudflare/workers-types"]
 })
